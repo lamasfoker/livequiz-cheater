@@ -1,0 +1,12 @@
+{
+    "require": {
+        "google/cloud-vision": "^0.24.1",
+        "google/cloud-translate": "^1.6",
+        "ext-mbstring": "*",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^6.5"
+    },
+    "autoload": {
+        "files": ["env.php"]
+    }
+}
