@@ -7,6 +7,9 @@
         "guzzlehttp/guzzle": "^6.5"
     },
     "autoload": {
-        "files": ["env.php"]
+        "files": ["env.php"],
+        "psr-4": {
+            "LamasFoker\\LiveQuiz\\": "src/"
+        }
     }
 }
