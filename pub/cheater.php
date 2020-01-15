@@ -19,6 +19,11 @@ try {
     $query = translate_text_to($query, 'en');
     $answer = get_answer($query);
     $answer = translate_text_to($answer, 'it');
+} catch (ServerException $exception) {
+    $text = detect_text($path);
+    $query = extract_query($text);
+    //TODO: make a call to google with query and search for the 3 answer, return the one with more matches
+    $answers = extract_answers($text);
 } catch (Exception $exception) {
     $answer = $exception->getMessage();
 }
@@ -69,6 +74,23 @@ function extract_query(string $text): string
 
 /**
  * @param string $text
+ * @return string[]
+ */
+function extract_answers(string $text): array
+{
+    $start = strpos($text, '?');
+    if ($start !== false) {
+        $text = mb_substr($text, --$start);
+    }
+    $answers = explode(PHP_EOL, $text);
+    $answers = array_filter($answers, function($key) {
+        return $key<3;
+    }, ARRAY_FILTER_USE_KEY);
+    return $answers;
+}
+
+/**
+ * @param string $text
  * @param string $language
  * @return string
  * @throws Exception
@@ -91,10 +113,11 @@ function translate_text_to(string $text, string $language): string
 /**
  * @param string $query
  * @return string
- * @throws Exception
+ * @throws ServerException
  */
 function get_answer(string $query): string
 {
+    //TODO: change exception
     $client = new Client();
     $url = WOLFRAMALPHA_SHORT_ANSWER_API_ENDPOINT . '?' .
         http_build_query([
@@ -102,14 +125,8 @@ function get_answer(string $query): string
             'i' => $query,
             'timeout' => 3
         ]);
-    try {
-        $response = $client->request('GET', $url);
-        if ($response->getStatusCode() === 200) {
-            return (string) $response->getBody();
-        }
-    } catch (ServerException $exception) {
-        //TODO: console log something
+    $response = $client->request('GET', $url);
+    if ($response->getStatusCode() === 200) {
+        return (string) $response->getBody();
     }
-    //TODO: change exception
-    throw new Exception('Wolfram|Alpha can\'t respond');
 }
