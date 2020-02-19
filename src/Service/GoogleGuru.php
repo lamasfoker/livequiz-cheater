@@ -5,7 +5,6 @@ namespace LamasFoker\LiveQuiz\Service;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ServerException;
-use LamasFoker\LiveQuiz\Exception\GoogleException;
 
 class GoogleGuru
 {
@@ -14,10 +13,9 @@ class GoogleGuru
     /**
      * @param string $question
      * @param array $answers
-     * @return string
-     * @throws GoogleException
+     * @return string|null
      */
-    public function respond(string $question, array $answers): string
+    public function respond(string $question, array $answers): ?string
     {
         $client = new Client();
         $url = self::GOOGLE_ENDPOINT . '?' .
@@ -27,13 +25,13 @@ class GoogleGuru
         try {
             $response = $client->request('GET', $url);
         } catch (ServerException $exception) {
-            throw new GoogleException();
+            return null;
         }
         if ($response->getStatusCode() === 200) {
             $body = (string) $response->getBody();
             return $this->getRightAnswer($body, $answers);
         }
-        throw new GoogleException();
+        return null;
     }
 
     /**

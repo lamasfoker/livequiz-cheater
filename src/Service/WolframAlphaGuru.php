@@ -5,7 +5,6 @@ namespace LamasFoker\LiveQuiz\Service;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ServerException;
-use LamasFoker\LiveQuiz\Exception\WolframAlphaException;
 
 class WolframAlphaGuru
 {
@@ -13,10 +12,9 @@ class WolframAlphaGuru
 
     /**
      * @param string $question
-     * @return string
-     * @throws WolframAlphaException
+     * @return string|null
      */
-    public function respond(string $question): string
+    public function respond(string $question): ?string
     {
         $client = new Client();
         $url = self::WOLFRAMALPHA_SHORT_ANSWER_API_ENDPOINT . '?' .
@@ -28,11 +26,11 @@ class WolframAlphaGuru
         try {
             $response = $client->request('GET', $url);
         } catch (ServerException $exception) {
-            throw new WolframAlphaException();
+            return null;
         }
         if ($response->getStatusCode() === 200) {
             return (string) $response->getBody();
         }
-        throw new WolframAlphaException();
+        return null;
     }
 }
