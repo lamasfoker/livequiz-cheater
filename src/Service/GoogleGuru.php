@@ -18,6 +18,10 @@ class GoogleGuru
     public function respond(string $question, array $answers): ?string
     {
         $client = new Client();
+        $isNegativeQuestion = preg_match('/\b(not|NOT)*\b/', $question) === 1;
+        if ($isNegativeQuestion) {
+            $question = preg_replace('/\b(not|NOT)*\b/', '', $question)?:$question;
+        }
         $url = self::GOOGLE_ENDPOINT . '?' .
             http_build_query([
                 'q' => $question
@@ -29,7 +33,7 @@ class GoogleGuru
         }
         if ($response->getStatusCode() === 200) {
             $body = (string) $response->getBody();
-            return $this->getRightAnswer($body, $answers);
+            return $this->getRightAnswer($body, $answers, $isNegativeQuestion);
         }
         return null;
     }
@@ -37,9 +41,10 @@ class GoogleGuru
     /**
      * @param string $body
      * @param array $answers
+     * @param bool $isNegativeQuestion
      * @return string
      */
-    private function getRightAnswer(string $body, array $answers): string
+    private function getRightAnswer(string $body, array $answers, bool $isNegativeQuestion = false): string
     {
         $answersScore = array_map(function ($answer) use ($body) {
             $explodedAnswer = array_filter(explode(' ', $answer), function($word) {
@@ -50,7 +55,11 @@ class GoogleGuru
             }, $explodedAnswer);
             return array_sum($occurrences);
         }, $answers);
-        $keyOfTheMaxScore = array_keys($answersScore, max($answersScore))[0];
+        if ($isNegativeQuestion) {
+            $keyOfTheMaxScore = array_keys($answersScore, min($answersScore))[0];
+        } else {
+            $keyOfTheMaxScore = array_keys($answersScore, max($answersScore))[0];
+        }
         return $answers[$keyOfTheMaxScore];
     }
 }
