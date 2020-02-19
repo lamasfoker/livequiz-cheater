@@ -1,8 +1,7 @@
 const cacheName = "livequizcheater",
     filesToCache = [
         "/",
-        "/index.html",
-        "/app.js"
+        "/index.php"
     ];
 
 self.addEventListener("install", function (e) {

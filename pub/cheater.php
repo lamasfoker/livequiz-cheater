@@ -2,17 +2,14 @@
 declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
-use LamasFoker\LiveQuiz\Exception\GoogleException;
-use LamasFoker\LiveQuiz\Exception\VisionApiException;
-use LamasFoker\LiveQuiz\Exception\WolframAlphaException;
+use LamasFoker\LiveQuiz\Exception\LiveQuizException;
 use LamasFoker\LiveQuiz\Service\GoogleGuru;
 use LamasFoker\LiveQuiz\Service\InformationExtractor;
 use LamasFoker\LiveQuiz\Service\TextDetector;
 use LamasFoker\LiveQuiz\Service\TextTranslator;
 use LamasFoker\LiveQuiz\Service\WolframAlphaGuru;
 
-$path = $_FILES['question']['tmp_name'] ?? __DIR__ . '/test.jpg';
-header('Content-Type: text/html');
+$path = $_FILES['question']['tmp_name'] ?? __DIR__ . '/../test/test2.jpg';
 $textDetector = new TextDetector();
 $textTranslator = new TextTranslator();
 $wolframAlphaGuru = new WolframAlphaGuru();
@@ -23,23 +20,19 @@ try {
     $text = $textDetector->detect($path);
     $question = $informationExtractor->extractQuestion($text);
     $question = $textTranslator->translate($question, 'en');
-} catch (VisionApiException $exception) {
-    $answer = $exception->getMessage();
-    echo "<!doctype html><html><h3>" . $answer . "</h3></html>";
-    return;
-}
-try {
     $answer = $wolframAlphaGuru->respond($question);
-} catch (WolframAlphaException $exception) {
-    $answers = $informationExtractor->extractAnswers($text);
-    $answers = array_map(function ($answer) use ($textTranslator) {
-        return $textTranslator->translate($answer, 'en');
-    }, $answers);
-    try {
+    if (is_null($answer)) {
+        $answers = $informationExtractor->extractAnswers($text);
+        $answers = array_map(function ($answer) use ($textTranslator) {
+            return $textTranslator->translate($answer, 'en');
+        }, $answers);
         $answer = $googleGuru->respond($question, $answers);
-    } catch (GoogleException $e) {
-        $answer = $answers[array_rand($answers, 1)];
+        if (is_null($answer)) {
+            $answer = $answers[array_rand($answers, 1)];
+        }
     }
+    $answer = $textTranslator->translate($answer, 'it');
+} catch (LiveQuizException $exception) {
+    $answer = $exception->getMessage();
 }
-//$answer = $textTranslator->translate($answer, 'it');
-echo "<!doctype html><html><h3>" . $answer . "</h3></html>";
+require_once('response.phtml');
