@@ -9,7 +9,7 @@ use LamasFoker\LiveQuiz\Service\TextDetector;
 use LamasFoker\LiveQuiz\Service\TextTranslator;
 use LamasFoker\LiveQuiz\Service\WolframAlphaGuru;
 
-$path = $_FILES['question']['tmp_name'] ?? __DIR__ . '/../test/test2.jpg';
+$path = $_FILES['question']['tmp_name'] ?? __DIR__ . '/../test/test.jpg';
 $textDetector = new TextDetector();
 $textTranslator = new TextTranslator();
 $wolframAlphaGuru = new WolframAlphaGuru();
