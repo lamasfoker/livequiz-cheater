@@ -46,7 +46,7 @@ class InformationExtractor
         $answers = array_filter($answers, function($value) {
             return mb_strlen($value) > 2;
         });
-        $answers = array_values($answers);
+        $answers = array_slice($answers, 0, 3);
         return $answers;
     }
 }

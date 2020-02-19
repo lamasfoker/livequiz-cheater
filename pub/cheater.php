@@ -31,7 +31,6 @@ try {
             $answer = $answers[array_rand($answers, 1)];
         }
     }
-    $answer = $textTranslator->translate($answer, 'it');
 } catch (LiveQuizException $exception) {
     $answer = $exception->getMessage();
 }

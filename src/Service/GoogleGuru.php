@@ -18,9 +18,9 @@ class GoogleGuru
     public function respond(string $question, array $answers): ?string
     {
         $client = new Client();
-        $isNegativeQuestion = preg_match('/\b(not|NOT)*\b/', $question) === 1;
+        $isNegativeQuestion = preg_match('/\b(not)\b/i', $question) === 1;
         if ($isNegativeQuestion) {
-            $question = preg_replace('/\b(not|NOT)*\b/', '', $question)?:$question;
+            $question = preg_replace('/\b(not)\b/i', '', $question)?:$question;
         }
         $url = self::GOOGLE_ENDPOINT . '?' .
             http_build_query([
@@ -51,7 +51,7 @@ class GoogleGuru
                 return strlen($word) > 3;
             });
             $occurrences = array_map(function ($word) use ($body) {
-                return substr_count($body, $word);
+                return preg_match_all('/\b'.$word.'\b/i', $body);
             }, $explodedAnswer);
             return array_sum($occurrences);
         }, $answers);
